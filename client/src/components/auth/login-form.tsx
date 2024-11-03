@@ -9,6 +9,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { authApi } from "@/lib/api";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     email: z.string().email('Invalid email'),
@@ -16,6 +18,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -25,11 +28,20 @@ export function LoginForm() {
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
-        console.log(values);
-        setTimeout(() => setIsLoading(false), 3000);
-    }
+        try {
+          const response = await authApi.login(values.email, values.password) as { access_token: string };
+          localStorage.setItem('auth_token', 
+            response.access_token);
+          router.push('/news');
+        } catch (error) {
+          console.error('Login failed:', error);
+          // Добавьте обработку ошибок здесь
+        } finally {
+          setIsLoading(false);
+        }
+      }
 
   return (  
     <Card className="w-[350px]">

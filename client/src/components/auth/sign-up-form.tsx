@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
+import { authApi } from '@/lib/api';
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().email('Invalid email'),
@@ -20,6 +22,7 @@ const formSchema = z.object({
 });
 
 export function SignUpForm() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -30,11 +33,18 @@ export function SignUpForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // Здесь должна быть логика отправки данных на сервер
-    console.log(values);
-    setTimeout(() => setIsLoading(false), 3000);
+    try {
+      const response = await authApi.register(values.email, values.password) as { access_token: string };
+      localStorage.setItem('auth_token', response.access_token);
+      router.push('/auth/signup/complete-profile');
+    } catch (error) {
+      console.error('Registration failed:', error);
+      // Добавьте обработку ошибок здесь
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (

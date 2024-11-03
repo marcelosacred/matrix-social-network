@@ -8,20 +8,21 @@ datasource db {
 }
 
 model User {
-  id                String       @id @default(uuid())
-  email             String       @unique
-  password          String
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  profile           UserProfile?
-  posts             Post[]
-  sentMessages      Message[]    @relation("SentMessages")
-  receivedMessages  Message[]    @relation("ReceivedMessages")
-  friends           Friends[]
-  groups            Groups[]
-  likes             Likes[]
-  bookmarks         Bookmarks[]
-  comments          Comments[]
+  id                  String       @id @default(uuid())
+  email               String       @unique
+  password            String
+  isProfileCompleted  Boolean   @default(false)
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  profile             UserProfile?
+  posts               Post[]
+  sentMessages        Message[]    @relation("SentMessages")
+  receivedMessages    Message[]    @relation("ReceivedMessages")
+  friends             Friends[]
+  groups              Groups[]
+  likes               Likes[]
+  bookmarks           Bookmarks[]
+  comments            Comments[]
 }
 
 model UserProfile {

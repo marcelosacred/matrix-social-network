@@ -6,4 +6,7 @@ export class RegisterDto {
 
   @ApiProperty()
   password: string;
+
+  @ApiProperty()
+  isProfileCompleted?: boolean;
 }

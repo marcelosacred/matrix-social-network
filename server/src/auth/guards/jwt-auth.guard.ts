@@ -1,12 +1,16 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class JwtAuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    // Здесь должна быть логика проверки JWT
-    return true; // Временно разрешаем все запросы
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  canActivate(context: ExecutionContext) {
+    return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any) {
+    if (err || !user) {
+      throw err || new UnauthorizedException();
+    }
+    return user;
   }
 }

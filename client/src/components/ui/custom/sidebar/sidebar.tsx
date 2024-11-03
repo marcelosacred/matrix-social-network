@@ -7,7 +7,7 @@ export default function Sidebar() {
   return (
     <aside className="w-64 h-full bg-white border-r border-gray-200 overflow-y-auto" key={sidebarData.length}>
       <nav className="flex flex-col p-4 space-y-2">
-        <Link href="/" className="items-center">
+        <Link href="/news" className="items-center">
             <div className="flex items-center gap-2">
                 <Image priority src="/logo.svg" alt="logo" width={45} height={45} className="invert"/>
                 <h1 className="text-2xl font-bold">Matrix</h1>

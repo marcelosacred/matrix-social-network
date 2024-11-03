@@ -4,9 +4,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { isAuthenticated } from '@/lib/auth';
 import Sidebar from "@/components/ui/custom/sidebar/sidebar";
-import { Progress } from "@/components/ui/progress";
+import { RightSidebar } from '@/components/ui/custom/right-sidebar/right-sidebar';
 
-const publicPaths = ['/auth/login', '/auth/signup', '/groups', '/profile'];
+const publicPaths = ['/auth/login', '/auth/signup', '/groups', '/profile', '/complete-profile'];
 
 export default function ClientLayout({
     children,
@@ -29,12 +29,18 @@ export default function ClientLayout({
 
     // Для авторизованных пользователей или публичных страниц
     return (
-      <div className='flex max-w-[1800px] mx-auto items-center justify-center'>
-        {isAuthed && <Sidebar />}
-        <main className='p-4 min-w-[750px] text-center'>
+      <div className='flex max-w-[1500px] mx-auto'>
+        <div className='w-[240px] flex-shrink-0'> {/* Фиксированная ширина для левого сайдбара */}
+          {isAuthed && !pathname.startsWith('/complete-profile') && <Sidebar />}
+        </div>
+        
+        <main className='flex-grow p-4 min-w-[750px] text-center'>
           {children}
         </main>
-        {isAuthed && <Sidebar />}
+    
+        <div className='w-[240px] flex-shrink-0'> {/* Фиксированная ширина для правого сайдбара */}
+          {isAuthed && !pathname.startsWith('/complete-profile') && <RightSidebar />}
+        </div>
       </div>
     );
   }
