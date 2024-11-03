@@ -6,6 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import { CompleteProfileDto } from './dto/complete-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { multerConfig } from '../config/multer.config';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -17,11 +18,15 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
+    console.log('Login attempt for:', loginDto.email);
     const user = await this.authService.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.authService.login(loginDto);
+    console.log('User validated:', user);
+    const result = await this.authService.login(user);
+    console.log('Login result:', result);
+    return result;
   }
 
   @ApiOperation({ summary: 'Register new user' })
@@ -41,21 +46,22 @@ export class AuthController {
 
   @Post('complete-profile')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('avatar'))
+  @UseInterceptors(FileInterceptor('avatar', multerConfig))
   async completeProfile(
     @Request() req,
     @Body() completeProfileDto: CompleteProfileDto,
     @UploadedFile() avatar?: Express.Multer.File,
   ) {
     try {
-      return await this.authService.completeProfile(
+      const result = await this.authService.completeProfile(
         req.user.userId,
         completeProfileDto,
         avatar
       );
+      return result;
     } catch (error) {
-      await this.authService.deleteUser(req.user.userId);
-      throw error;
+      console.error('Profile completion error:', error);
+      throw new InternalServerErrorException('Failed to complete profile');
     }
   }
 }

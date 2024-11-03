@@ -1,23 +1,19 @@
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { join } from 'path';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
   app.enableCors({
     origin: 'http://localhost:3000',
     credentials: true,
   });
 
-  const config = new DocumentBuilder()
-    .setTitle('Matrix API')
-    .setDescription('API for Matrix social network')
-    .setVersion('1.0')
-    .addTag('matrix')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   await app.listen(3001);
 }

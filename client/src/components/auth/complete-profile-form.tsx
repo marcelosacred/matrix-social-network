@@ -69,22 +69,19 @@ export function CompleteProfileForm() {
       formData.append('firstName', values.firstName);
       formData.append('lastName', values.lastName);
       formData.append('dateOfBirth', values.dateOfBirth);
-      if (values.avatar?.[0]) {
+      
+      if (values.avatar && values.avatar[0]) {
         formData.append('avatar', values.avatar[0]);
+        console.log('Appending avatar:', values.avatar[0]);
       }
 
       const response = await authApi.completeProfile(formData) as { access_token: string };
+      console.log('Profile completion response:', response);
+      
       localStorage.setItem('auth_token', response.access_token);
       router.push('/news');
     } catch (error) {
       console.error('Profile completion failed:', error);
-      // Показываем ошибку пользователю вместо редиректа
-      // toast.error('Failed to complete profile. Please try again.');
-      setIsLoading(false);
-      // НЕ удаляем токен и НЕ редиректим на логин
-      // localStorage.removeItem('auth_token');
-      // router.push('/auth/login');
-    } finally {
       setIsLoading(false);
     }
   }

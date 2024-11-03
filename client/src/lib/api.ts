@@ -1,6 +1,4 @@
 import axios from 'axios';
-import { isAxiosError } from 'axios';
-
 const API_URL = 'http://localhost:3001';
 
 export const api = axios.create({
@@ -17,10 +15,38 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        headers: error.config?.headers,
+      }
+    });
+    return Promise.reject(error);
+  }
+);
+
 export const authApi = {
   login: async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
-    return response.data;
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error && 'response' in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 401) {
+          throw new Error('Invalid email or password');
+        }
+      }
+      throw new Error('Login failed');
+    }
   },
   
   register: async (email: string, password: string) => {
@@ -28,10 +54,10 @@ export const authApi = {
       const response = await api.post('/auth/register', { email, password });
       return response.data;
     } catch (error) {
-      const err = error as Error;
-      if (isAxiosError(err)) {
-        if (err.response?.status === 401) {
-          throw new Error('User already exists');
+      if (error instanceof Error && 'response' in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 400) {
+          throw new Error('User with this email already exists');
         }
       }
       throw new Error('Registration failed');

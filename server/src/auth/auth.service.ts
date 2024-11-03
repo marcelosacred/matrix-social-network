@@ -24,12 +24,10 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
+    console.log('Creating token with payload:', payload);
+    const token = await this.jwtService.signAsync(payload);
     return {
-      access_token: this.jwtService.sign(payload),
-      user: {
-        id: user.id,
-        email: user.email
-      }
+      access_token: token,
     };
   }
 
@@ -62,12 +60,12 @@ export class AuthService {
     avatar?: Express.Multer.File,
   ) {
     try {
+      console.log('Processing avatar:', avatar);
       const avatarUrl = avatar ? await this.uploadAvatar(avatar) : null;
+      console.log('Avatar URL:', avatarUrl);
 
-      // Используем транзакцию для атомарного обновления
       return await this.prisma.$transaction(async (prisma) => {
-        // Создаем профиль пользователя
-        await prisma.userProfile.create({
+        const userProfile = await prisma.userProfile.create({
           data: {
             userId,
             firstName: profileData.firstName,
@@ -77,27 +75,26 @@ export class AuthService {
           },
         });
 
-        // Обновляем статус заполнения профиля
+        console.log('Created profile:', userProfile);
+
         const updatedUser = await prisma.user.update({
           where: { id: userId },
           data: { isProfileCompleted: true },
         });
 
-        // Генерируем новый токен
         return this.login(updatedUser);
       });
     } catch (error) {
-      // Логируем ошибку для отладки
       console.error('Profile completion error:', error);
       throw new Error('Failed to complete profile: ' + error.message);
     }
   }
 
-  // Метод для загрузки аватара (простой пример)
   private async uploadAvatar(file: Express.Multer.File): Promise<string> {
-    // Здесь должна быть реальная логика загрузки файла
-    // Это просто пример
-    return `uploads/avatars/${file.filename}`;
+    if (!file) {
+      throw new Error('No file provided');
+    }
+    return `/uploads/avatars/${file.filename}`;
   }
 
   async deleteUser(userId: string) {

@@ -24,6 +24,7 @@ const formSchema = z.object({
 export function SignUpForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,13 +36,17 @@ export function SignUpForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await authApi.register(values.email, values.password) as { access_token: string };
       localStorage.setItem('auth_token', response.access_token);
       router.push('/auth/signup/complete-profile');
     } catch (error) {
-      console.error('Registration failed:', error);
-      // Добавьте обработку ошибок здесь
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -54,6 +59,11 @@ export function SignUpForm() {
         <CardDescription className='text-left'>Enter your email and password to sign up</CardDescription>
       </CardHeader>
       <CardContent>
+        {error && (
+          <div className="mb-4 p-2 text-sm text-destructive bg-destructive/10 rounded-md text-left">
+            {error}
+          </div>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField

@@ -1,9 +1,10 @@
 import { Metadata } from "next";
+import { ProfileContent } from "@/components/profile/profile-content";
 
 export const metadata: Metadata = {
-    title: "Profile", // TODO: change to user name
+    title: "Profile",
 };
 
 export default function Profile() {
-    return <div>Profile Page</div>;
+    return <ProfileContent />;
 }

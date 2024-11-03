@@ -15,11 +15,11 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <div className="min-h-screen relative overflow-hidden">
       <div className="bg-image" />
       <div className="content-wrapper">
         {children}
       </div>
-    </>
+    </div>
   );
 }
